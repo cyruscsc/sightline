@@ -93,7 +93,7 @@ Make the summary clear, concise, and well-structured."""
             "format_instructions": self._output_parser.get_format_instructions(),
         }
 
-    def generate_summary(self, paper_data: dict) -> str:
+    def generate_summary(self, paper_data: dict) -> dict:
         """
         Generate a markdown summary of the paper.
 
@@ -109,26 +109,4 @@ Make the summary clear, concise, and well-structured."""
         chain = self._prompt_template | self._llm | self._output_parser
         summary = chain.invoke(prompt_inputs)
 
-        # Format the markdown output
-        markdown = f"""# Summary of {summary.title}
-
-## Authors
-{', '.join(summary.authors)}
-
-## Abstract
-{summary.abstract}
-
-## Key Points
-{chr(10).join(f"- {point}" for point in summary.key_points)}
-
-## Methodology
-{summary.methodology}
-
-## Results
-{summary.results}
-
-## Implications
-{summary.implications}
-"""
-
-        return markdown
+        return summary.model_dump()

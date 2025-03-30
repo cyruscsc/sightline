@@ -88,9 +88,12 @@ class PaperQA:
         """
         if not question or not question.strip():
             raise ValueError("Question cannot be empty")
-            
+
         result = self._qa_chain.invoke(question)
-        return result
+
+        # TODO: Add confidence and source sections
+
+        return {"answer": result}
 
     @property
     def paper_details(self) -> dict:

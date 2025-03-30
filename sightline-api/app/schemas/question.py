@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class QuestionRequest(BaseModel):
@@ -18,13 +18,15 @@ class QuestionRequest(BaseModel):
 
 
 class QuestionResponse(BaseModel):
-    answer: str
+    answer: str = Field(
+        description="The answer to the question based on the paper content"
+    )
 
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
-                    "answer": "The proposed network architecture is the Transformer architecture. This model primarily uses a mechanism known as self-attention, combined with feed-forward neural networks"
+                    "answer": "The proposed network architecture is the Transformer architecture. This model primarily uses a mechanism known as self-attention, combined with feed-forward neural networks. The architecture consists of stacked encoder-decoder layers, where each layer contains multi-head self-attention and position-wise fully connected feed-forward networks.",
                 }
             ]
         }
