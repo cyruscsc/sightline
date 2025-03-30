@@ -23,18 +23,11 @@ class PaperSummary(BaseModel):
 
 
 class PaperSummarizer:
-    def __init__(self, openai_api_key: str):
+    def __init__(self):
         """
-        Initialize the PaperSummarizer with OpenAI API key.
-
-        Args:
-            openai_api_key (str): OpenAI API key for accessing the language model
+        Initialize the PaperSummarizer.
         """
-        self._llm = ChatOpenAI(
-            model_name="gpt-4o",
-            temperature=0.3,
-            openai_api_key=openai_api_key,
-        )
+        self._llm = ChatOpenAI(model_name="gpt-4o", temperature=0.3)
         self._output_parser = PydanticOutputParser(pydantic_object=PaperSummary)
         self._prompt_template = self._create_prompt_template()
 

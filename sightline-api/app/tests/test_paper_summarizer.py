@@ -5,12 +5,16 @@ from app.paper_reader.arxiv_paper import ArXivPaper
 from dotenv import load_dotenv
 import os
 
+# Load environment variables
 load_dotenv()
+
+# Test paper URL (Attention Is All You Need)
+PAPER_URL = "https://arxiv.org/abs/1706.03762"
 
 @pytest.fixture
 def real_paper_data():
     """Create real paper data from the actual paper."""
-    paper = ArXivPaper("https://arxiv.org/abs/1706.03762")
+    paper = ArXivPaper(PAPER_URL)
     return paper.get_paper_data()
 
 @pytest.fixture

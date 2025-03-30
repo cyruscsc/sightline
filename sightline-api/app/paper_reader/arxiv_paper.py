@@ -102,19 +102,7 @@ class ArXivPaper:
         Returns:
             List[Document]: List of LangChain Document objects, each containing:
                 - page_content: A chunk of the paper's content
-                - metadata: Dictionary containing paper metadata and chunk information
         """
-        # Create metadata for the document
-        metadata = {
-            "arxiv_id": self._details["arxiv_id"],
-            "title": self._details["title"],
-            "authors": self._details["authors"],
-            "published": self._details["published"],
-            "categories": self._details["categories"],
-            "doi": self._details["doi"],
-            "pdf_url": self._details["pdf_url"],
-        }
-
         # Download and get the paper content
         pdf_path = self._paper.download_pdf()
         reader = PdfReader(pdf_path)
@@ -131,13 +119,10 @@ class ArXivPaper:
         chunks = self._text_splitter.split_text(content)
 
         # Create documents for each chunk
-        documents = []
-        for i, chunk in enumerate(chunks):
-            doc = Document(
-                page_content=chunk,
-                metadata={**metadata, "chunk_index": i, "total_chunks": len(chunks)},
-            )
-            documents.append(doc)
+        documents = [
+            Document(page_content=chunk)
+            for chunk in chunks
+        ]
 
         return documents
 
