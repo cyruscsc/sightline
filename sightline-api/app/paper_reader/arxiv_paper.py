@@ -2,6 +2,8 @@ import arxiv
 from urllib.parse import urlparse
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from pypdf import PdfReader
+import os
 
 
 class ArXivPaper:
@@ -113,8 +115,17 @@ class ArXivPaper:
             "pdf_url": self._details["pdf_url"],
         }
 
-        # Get the paper content
-        content = self._paper.content
+        # Download and get the paper content
+        pdf_path = self._paper.download_pdf()
+        reader = PdfReader(pdf_path)
+        
+        # Extract text from all pages
+        content = ""
+        for page in reader.pages:
+            content += page.extract_text() + "\n"
+
+        # Delete the PDF file after processing
+        os.remove(pdf_path)
 
         # Split the content into chunks
         chunks = self._text_splitter.split_text(content)
