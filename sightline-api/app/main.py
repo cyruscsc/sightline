@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="SightLine API",
-    description="Get insights from any paper",
+    description="Get insights from arXiv papers",
     version="0.1.0",
 )
 

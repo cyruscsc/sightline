@@ -9,7 +9,7 @@ class QuestionRequest(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "paper_url": "https://arxiv.org/pdf/1706.03762",
+                    "paper_url": "https://arxiv.org/abs/1706.03762",
                     "question": "What is the proposed network architecture?",
                 }
             ]
