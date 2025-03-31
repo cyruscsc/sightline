@@ -1,0 +1,28 @@
+<script lang="ts">
+  import { sightline } from '$lib/state.svelte.ts';
+</script>
+
+<div class="form-group">
+  <label for="arxiv-url">arXiv Paper URL</label>
+  <input 
+    type="text" 
+    id="arxiv-url" 
+    bind:value={sightline.arxivUrl} 
+    placeholder="e.g., https://arxiv.org/abs/2303.08774"
+  />
+</div>
+
+<style>
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+</style> 
