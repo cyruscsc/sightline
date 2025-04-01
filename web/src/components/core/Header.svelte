@@ -29,6 +29,6 @@
 
 	.subtitle {
 		font-size: 1rem;
-		color: #666;
+		color: var(--small-text);
 	}
 </style>

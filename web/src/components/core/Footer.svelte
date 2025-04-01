@@ -1,7 +1,5 @@
 <footer class="footer">
-    <p class="footer-text">
-        Copyright © 2025 Cyrus Chan. All rights reserved.
-    </p>
+	<p class="footer-text">Copyright © 2025 Cyrus Chan.</p>
 </footer>
 
 <style>
@@ -14,5 +12,6 @@
 
 	.footer-text {
 		font-size: 0.75rem;
+		color: var(--small-text);
 	}
 </style>

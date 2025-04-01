@@ -22,10 +22,10 @@
 
 <style>
 	.input-container {
-		background-color: white;
+		background-color: var(--card-bg);
 		border-radius: 16px;
 		padding: 1.5rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		box-shadow: var(--shadow);
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
@@ -35,13 +35,6 @@
 		margin-top: 0.5rem;
 		display: flex;
 		gap: 1rem;
-	}
-
-	.error-message {
-		padding: 0.75rem;
-		background-color: #fee2e2;
-		color: #b91c1c;
-		border-radius: 4px;
 	}
 
 	@media (max-width: 640px) {

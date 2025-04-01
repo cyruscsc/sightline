@@ -6,12 +6,11 @@
 <div class="output-container">
 	{#if sightline.isLoading}
 		<div class="loading">
-			<Spinner size="3rem" />
-			<div>Loading...</div>
+			<Spinner />
 		</div>
 	{:else if sightline.result}
 		<div class="result">
-			<div>{@html sightline.result}</div>
+			{@html sightline.result}
 		</div>
 	{:else}
 		<div class="empty-result">
@@ -22,10 +21,10 @@
 
 <style>
 	.output-container {
-		background-color: white;
+		background-color: var(--card-bg);
 		border-radius: 16px;
 		padding: 1.5rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		box-shadow: var(--shadow);
 		margin-bottom: 2rem;
 	}
 
@@ -33,10 +32,13 @@
 	.empty-result {
 		text-align: center;
 		padding: 2rem 0;
-		color: #6b7280;
+		color: var(--small-text);
 	}
 
 	.result {
 		line-height: 1.5;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 </style>
