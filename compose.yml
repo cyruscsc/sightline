@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  web:
+    image: <registry>/sightline-web:latest
+    platform: linux/amd64
+    container_name: sightline-web
+    restart: unless-stopped
+    ports:
+      - "3010:3000"
+    networks:
+      - sightline-network
+
+  api:
+    image: <registry>/sightline-api:latest
+    platform: linux/amd64
+    container_name: sightline-api
+    restart: unless-stopped
+    ports:
+      - "8010:8000"
+    networks:
+      - sightline-network
+
+networks:
+  sightline-network:
+    driver: bridge

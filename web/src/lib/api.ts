@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL;
+
 export interface SummarizeRequest {
 	arxiv_url: string;
 }
@@ -25,7 +27,7 @@ export interface AskResponse {
  * Get a summary of the paper
  */
 export const summarizePaper = async (arxivUrl: string): Promise<string> => {
-	const response = await fetch('/api/summarize', {
+	const response = await fetch(`${API_URL}/summarize`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -62,7 +64,7 @@ export const summarizePaper = async (arxivUrl: string): Promise<string> => {
  * Ask a question about the paper
  */
 export const askQuestion = async (arxivUrl: string, question: string): Promise<string> => {
-	const response = await fetch('/api/ask', {
+	const response = await fetch(`${API_URL}/ask`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'

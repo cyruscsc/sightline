@@ -9,10 +9,7 @@ from app.paper_reader import ArXivPaper, PaperSummarizer, PaperQA
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 
-router = APIRouter(
-    prefix="/api/v1",
-    tags=["api/v1"],
-)
+router = APIRouter()
 
 
 @router.get("/", response_model=HealthCheck)
