@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { sightline } from '$lib/state.svelte.ts';
+  import { sightline } from '$lib/state.svelte';
   import { askQuestion } from '$lib/api';
   
   async function handleAsk() {

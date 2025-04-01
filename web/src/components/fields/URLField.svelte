@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { sightline } from '$lib/state.svelte.ts';
+  import { sightline } from '$lib/state.svelte';
 </script>
 
 <div class="form-group">

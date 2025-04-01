@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { sightline } from '$lib/state.svelte.ts';
+	import { sightline } from '$lib/state.svelte';
 	import URLField from '$components/fields/URLField.svelte';
 	import QuestionField from '$components/fields/QuestionField.svelte';
 	import SummarizeButton from '$components/buttons/SummarizeButton.svelte';
@@ -26,7 +26,6 @@
 		border-radius: 16px;
 		padding: 1.5rem;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		margin-bottom: 2rem;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;

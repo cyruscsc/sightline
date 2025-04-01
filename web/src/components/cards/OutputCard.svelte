@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { sightline } from '$lib/state.svelte.ts';
-	import Spinner from '$components/Spinner.svelte';
+	import { sightline } from '$lib/state.svelte';
+	import Spinner from '$components/core/Spinner.svelte';
 </script>
 
 <div class="output-container">
-	<h2>Results</h2>
 	{#if sightline.isLoading}
 		<div class="loading">
 			<Spinner size="3rem" />
@@ -28,11 +27,6 @@
 		padding: 1.5rem;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 		margin-bottom: 2rem;
-	}
-
-	h2 {
-		margin-top: 0;
-		margin-bottom: 1rem;
 	}
 
 	.loading,

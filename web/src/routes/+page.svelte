@@ -8,31 +8,20 @@
 	<meta name="description" content="Get insights from arXiv papers" />
 </svelte:head>
 
-<main>
-	<div class="container">
-		<h1>SightLine</h1>
-		<p>Get insights from arXiv papers</p>
-
-		<InputCard />
-		<OutputCard />
-	</div>
-</main>
+<div class="container">
+	<InputCard />
+	<OutputCard />
+</div>
 
 <style>
-	main {
-		min-height: 100vh;
-		padding: 2rem 1rem;
-		background-color: #f9f9f9;
-	}
-
 	.container {
-		max-width: 800px;
+		max-width: 48rem;
+		width: 100%;
 		margin: 0 auto;
-	}
-
-	h1 {
-		font-size: 2.5rem;
-		margin-bottom: 0.5rem;
-		color: #333;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		flex: 1;
+		padding: 1rem 0;
 	}
 </style>
