@@ -9,7 +9,7 @@ load_dotenv()
 app = FastAPI(
     title="SightLine API",
     description="Get insights from arXiv papers",
-    version="0.1.0",
+    version="0.1.1",
     root_path="/api/v1",
 )
 

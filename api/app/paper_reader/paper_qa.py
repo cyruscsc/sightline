@@ -4,6 +4,8 @@ from langchain_core.runnables import RunnablePassthrough, Runnable
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
+import tempfile
+import shutil
 
 
 class PaperQA:
@@ -18,13 +20,8 @@ class PaperQA:
         self._documents = paper_data["documents"]
         self._details = paper_data["details"]
 
-        # Initialize embeddings and vector store
+        # Initialize embeddings
         self._embeddings = OpenAIEmbeddings()
-        self._vectorstore = Chroma.from_documents(
-            documents=self._documents,
-            embedding=self._embeddings,
-        )
-        self._retriever = self._vectorstore.as_retriever(search_kwargs={"k": 4})
 
         # Initialize the LLM
         self._llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
@@ -63,7 +60,9 @@ class PaperQA:
 
         rag_chain = (
             {
-                "context": self._retriever | self._format_context,
+                "context": RunnablePassthrough()
+                | self._get_context
+                | self._format_context,
                 "question": RunnablePassthrough(),
             }
             | prompt
@@ -73,7 +72,39 @@ class PaperQA:
 
         return rag_chain
 
-    def ask_question(self, question: str) -> str:
+    def _get_context(self, question: str) -> list[Document]:
+        """
+        Creates a new vector store for each query, retrieves context, and cleans up.
+
+        Args:
+            question (str): The question to retrieve context for
+
+        Returns:
+            list[Document]: Retrieved documents
+        """
+        # Create a temporary directory for Chroma
+        temp_dir = tempfile.mkdtemp()
+
+        try:
+            # Create a new vector store with the documents using in-memory storage
+            vectorstore = Chroma.from_documents(
+                documents=self._documents,
+                embedding=self._embeddings,
+                persist_directory=temp_dir,
+            )
+
+            # Get the retriever and retrieve documents
+            retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+            retrieved_docs = retriever.invoke(question)
+
+            # Return retrieved docs
+            return retrieved_docs
+
+        finally:
+            # Clean up by deleting the temporary directory
+            shutil.rmtree(temp_dir)
+
+    def ask_question(self, question: str) -> dict:
         """
         Ask a question about the paper and get an answer using RAG.
 
@@ -81,7 +112,7 @@ class PaperQA:
             question (str): The question to ask about the paper
 
         Returns:
-            str: The answer to the question
+            dict: Dictionary with the answer to the question
 
         Raises:
             ValueError: If the question is empty
