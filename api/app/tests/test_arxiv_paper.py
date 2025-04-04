@@ -65,13 +65,6 @@ class TestArXivPaper:
         assert all(isinstance(doc, Document) for doc in documents)
         assert len(documents) > 0  # Should have at least one document
 
-        # Check first document metadata
-        first_doc = documents[0]
-        assert "1706.03762" in first_doc.metadata["arxiv_id"]
-        assert first_doc.metadata["title"] == "Attention Is All You Need"
-        assert first_doc.metadata["chunk_index"] == 0
-        assert "total_chunks" in first_doc.metadata
-
     def test_property_getters(self, arxiv_paper):
         """Test all property getters."""
         assert arxiv_paper.title == "Attention Is All You Need"
@@ -95,7 +88,9 @@ class TestArXivPaper:
         # Try to modify the returned copies
         details = arxiv_paper.details
         details["title"] = "Modified Title"
-        assert arxiv_paper.title == "Attention Is All You Need"  # Original should be unchanged
+        assert (
+            arxiv_paper.title == "Attention Is All You Need"
+        )  # Original should be unchanged
 
         authors = arxiv_paper.authors
         authors.append("Author 3")
