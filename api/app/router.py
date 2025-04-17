@@ -21,7 +21,7 @@ async def health_check():
 async def summarize(summary_request: SummaryRequest) -> dict:
     try:
         # Initialize paper reader and get paper data
-        paper = ArXivPaper(summary_request.paper_url, 20000, 2000)
+        paper = ArXivPaper(summary_request.paper_url, 8000, 800)
         paper_data = paper.get_paper_data()
 
         # Generate summary

@@ -1,5 +1,7 @@
+from operator import itemgetter
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableLambda
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -45,7 +47,6 @@ class PaperSummarizer:
 
         human_template = """Please analyze the following section of the paper and create a focused summary.
 
-Paper Title: {title}
 Section Content:
 {content}
 
@@ -100,7 +101,7 @@ Make the summary clear, concise, and well-structured."""
             [system_message_prompt, human_message_prompt]
         )
 
-    def _prepare_section_prompt_inputs(self, paper_details: dict, document: Document) -> dict:
+    def _prepare_section_prompt_inputs(self, document: Document) -> dict:
         """
         Prepare inputs for the section prompt template.
 
@@ -112,9 +113,21 @@ Make the summary clear, concise, and well-structured."""
             Dict: Formatted inputs for the prompt template
         """
         return {
-            "title": paper_details["title"],
             "content": document.page_content,
         }
+
+    def _combine_section_outputs(self, section_outputs: dict) -> list[str]:
+        """
+        Combine the outputs from different sections into a list of summaries.
+
+        Args:
+            section_outputs (dict): Dictionary of section outputs
+
+        Returns:
+            list[str]: List of section summaries
+        """
+        # return [str(summary) for summary in section_outputs.values()]
+        return list(section_outputs.values())
 
     def _prepare_overall_prompt_inputs(self, paper_details: dict, section_summaries: list[str]) -> dict:
         """
@@ -134,7 +147,7 @@ Make the summary clear, concise, and well-structured."""
             "section_summaries": "\n\n".join(section_summaries),
             "format_instructions": self._overall_output_parser.get_format_instructions(),
         }
-
+    
     def generate_summary(self, paper_data: dict) -> dict:
         """
         Generate a markdown summary of the paper.
@@ -145,19 +158,24 @@ Make the summary clear, concise, and well-structured."""
         Returns:
             str: Markdown-formatted summary of the paper
         """
-        if len(paper_data["documents"]) > 1:
-            section_summaries = []
-            section_chain = self._section_prompt_template | self._llm | self._section_output_parser
+        n = len(paper_data["documents"])
 
-            for doc in paper_data["documents"]:
-                section_prompt_inputs = self._prepare_section_prompt_inputs(paper_data["details"], doc)
-                section_summary = section_chain.invoke(section_prompt_inputs)
-                section_summaries.append(section_summary)
+        section_chain = (
+            {
+                f"doc_{i}": (
+                    itemgetter(f"doc_{i}") 
+                    | RunnableLambda(self._prepare_section_prompt_inputs)
+                    | self._section_prompt_template 
+                    | self._llm 
+                    | self._section_output_parser
+                ) for i in range(n)
+            } 
+            | RunnableLambda(self._combine_section_outputs)
+        )
 
-            overall_prompt_inputs = self._prepare_overall_prompt_inputs(paper_data["details"], section_summaries)
-        
-        else:
-            overall_prompt_inputs = self._prepare_overall_prompt_inputs(paper_data["details"], [paper_data["documents"][0].page_content])
+        section_summaries = section_chain.invoke({f"doc_{i}": doc for i, doc in enumerate(paper_data["documents"])})
+
+        overall_prompt_inputs = self._prepare_overall_prompt_inputs(paper_data["details"], section_summaries)
 
         overall_chain = self._overall_prompt_template | self._llm | self._overall_output_parser
         summary = overall_chain.invoke(overall_prompt_inputs)
