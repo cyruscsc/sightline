@@ -1,15 +1,16 @@
 from operator import itemgetter
-from langchain_openai import ChatOpenAI
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableLambda
+from pydantic import BaseModel, Field
+from textwrap import dedent
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.schema import Document
-from pydantic import BaseModel, Field
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableLambda
+from langchain_openai import ChatOpenAI
+
 
 class PaperSummary(BaseModel):
     """Structure for the paper summary output."""
@@ -31,10 +32,10 @@ class PaperSummarizer:
         Initialize the PaperSummarizer.
         """
         self._llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0.3)
-        self._section_output_parser = StrOutputParser()
-        self._overall_output_parser = PydanticOutputParser(pydantic_object=PaperSummary)
         self._section_prompt_template = self._create_section_prompt_template()
         self._overall_prompt_template = self._create_overall_prompt_template()
+        self._section_output_parser = StrOutputParser()
+        self._overall_output_parser = PydanticOutputParser(pydantic_object=PaperSummary)
 
     def _create_section_prompt_template(self) -> ChatPromptTemplate:
         """
@@ -45,23 +46,26 @@ class PaperSummarizer:
         """
         system_template = """You are an expert at analyzing sections of academic papers. Your task is to analyze a specific section of a paper and create a focused summary that captures the key information from that section."""
 
-        human_template = """Please analyze the following section of the paper and create a focused summary.
+        human_template = dedent(
+            """\
+            Please analyze the following section of the paper and create a focused summary.
 
-Section Content:
-{content}
+            Section Content:
+            {content}
 
-Please provide a brief summary of this section, focusing on:
-1. Main ideas and arguments presented
-2. Key findings or methodological details
-3. How this section contributes to the overall paper
-4. Any significant equations, results, or conclusions
+            Please provide a brief summary of this section, focusing on:
+            1. Main ideas and arguments presented
+            2. Key findings or methodological details
+            3. How this section contributes to the overall paper
+            4. Any significant equations, results, or conclusions
 
-Make the summary clear and concise while preserving all important technical details."""
+            Make the summary clear and concise while preserving all important technical details."""
+        )
 
-        system_message_prompt = SystemMessagePromptTemplate.from_template(system_template)
-        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+        system_message = SystemMessagePromptTemplate.from_template(system_template)
+        human_message = HumanMessagePromptTemplate.from_template(human_template)
 
-        return ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
+        return ChatPromptTemplate.from_messages([system_message, human_message])
 
     def _create_overall_prompt_template(self) -> ChatPromptTemplate:
         """
@@ -72,83 +76,35 @@ Make the summary clear and concise while preserving all important technical deta
         """
         system_template = """You are an expert at summarizing academic papers. Your task is to analyze academic papers and create comprehensive, well-structured summaries that capture the key aspects of the research."""
 
-        human_template = """Please analyze the following paper and create a comprehensive summary.
+        human_template = dedent(
+            """\
+            Please analyze the following paper and create a comprehensive summary.
 
-Paper Title: {title}
-Authors: {authors}
-Abstract: {abstract}
+            Paper Title: {title}
+            Authors: {authors}
+            Abstract: {abstract}
 
-Summaries of All Sections:
-{section_summaries}
+            Summaries of All Sections:
+            {section_summaries}
 
-Please provide a detailed summary following this structure:
-{format_instructions}
+            Please provide a detailed summary following this structure:
+            {format_instructions}
 
-Focus on:
-1. Capturing the main contributions and findings
-2. Explaining the methodology clearly
-3. Highlighting key results and their significance
-4. Discussing the implications of the research
+            Focus on:
+            1. Capturing the main contributions and findings
+            2. Explaining the methodology clearly
+            3. Highlighting key results and their significance
+            4. Discussing the implications of the research
 
-Make the summary clear, concise, and well-structured."""
-
-        system_message_prompt = SystemMessagePromptTemplate.from_template(
-            system_template
-        )
-        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
-
-        return ChatPromptTemplate.from_messages(
-            [system_message_prompt, human_message_prompt]
+            Make the summary clear, concise, and well-structured."""
         )
 
-    def _prepare_section_prompt_inputs(self, document: Document) -> dict:
-        """
-        Prepare inputs for the section prompt template.
+        system_message = SystemMessagePromptTemplate.from_template(system_template)
+        human_message = HumanMessagePromptTemplate.from_template(human_template)
 
-        Args:
-            paper_details (Dict): Paper data from ArXivPaper.get_paper_data()
-            document (Document): The part of the paper to be summarized
+        return ChatPromptTemplate.from_messages([system_message, human_message])
 
-        Returns:
-            Dict: Formatted inputs for the prompt template
-        """
-        return {
-            "content": document.page_content,
-        }
-
-    def _combine_section_outputs(self, section_outputs: dict) -> list[str]:
-        """
-        Combine the outputs from different sections into a list of summaries.
-
-        Args:
-            section_outputs (dict): Dictionary of section outputs
-
-        Returns:
-            list[str]: List of section summaries
-        """
-        # return [str(summary) for summary in section_outputs.values()]
-        return list(section_outputs.values())
-
-    def _prepare_overall_prompt_inputs(self, paper_details: dict, section_summaries: list[str]) -> dict:
-        """
-        Prepare inputs for the overall prompt template.
-
-        Args:
-            paper_details (Dict): Paper data from ArXivPaper.get_paper_data()
-            section_summaries (list[str]): List of section summaries
-
-        Returns:
-            Dict: Formatted inputs for the prompt template
-        """
-        return {
-            "title": paper_details["title"],
-            "authors": ", ".join(paper_details["authors"]),
-            "abstract": paper_details["abstract"],
-            "section_summaries": "\n\n".join(section_summaries),
-            "format_instructions": self._overall_output_parser.get_format_instructions(),
-        }
-    
-    def generate_summary(self, paper_data: dict) -> dict:
+    async def generate_summary(self, paper_data: dict) -> dict:
         """
         Generate a markdown summary of the paper.
 
@@ -158,26 +114,32 @@ Make the summary clear, concise, and well-structured."""
         Returns:
             str: Markdown-formatted summary of the paper
         """
-        n = len(paper_data["documents"])
 
-        section_chain = (
-            {
-                f"doc_{i}": (
-                    itemgetter(f"doc_{i}") 
-                    | RunnableLambda(self._prepare_section_prompt_inputs)
-                    | self._section_prompt_template 
-                    | self._llm 
-                    | self._section_output_parser
-                ) for i in range(n)
-            } 
-            | RunnableLambda(self._combine_section_outputs)
+        section_chain = {
+            f"doc_{i}": (
+                itemgetter(f"doc_{i}")
+                | RunnableLambda(lambda doc: {"content": doc.page_content})
+                | self._section_prompt_template
+                | self._llm
+                | self._section_output_parser
+            )
+            for i in range(len(paper_data["documents"]))
+        } | RunnableLambda(lambda outputs: "\n\n".join(list(outputs.values())))
+
+        overall_chain = (
+            self._overall_prompt_template | self._llm | self._overall_output_parser
         )
 
-        section_summaries = section_chain.invoke({f"doc_{i}": doc for i, doc in enumerate(paper_data["documents"])})
-
-        overall_prompt_inputs = self._prepare_overall_prompt_inputs(paper_data["details"], section_summaries)
-
-        overall_chain = self._overall_prompt_template | self._llm | self._overall_output_parser
-        summary = overall_chain.invoke(overall_prompt_inputs)
+        summary = await overall_chain.ainvoke(
+            {
+                "title": paper_data["details"]["title"],
+                "authors": ", ".join(paper_data["details"]["authors"]),
+                "abstract": paper_data["details"]["abstract"],
+                "section_summaries": await section_chain.ainvoke(
+                    {f"doc_{i}": doc for i, doc in enumerate(paper_data["documents"])}
+                ),
+                "format_instructions": self._overall_output_parser.get_format_instructions(),
+            }
+        )
 
         return summary.model_dump()

@@ -104,7 +104,7 @@ class PaperQA:
             # Clean up by deleting the temporary directory
             shutil.rmtree(temp_dir)
 
-    def ask_question(self, question: str) -> dict:
+    async def ask_question(self, question: str) -> dict:
         """
         Ask a question about the paper and get an answer using RAG.
 
@@ -120,7 +120,7 @@ class PaperQA:
         if not question or not question.strip():
             raise ValueError("Question cannot be empty")
 
-        result = self._qa_chain.invoke(question)
+        result = await self._qa_chain.ainvoke(question)
 
         # TODO: Add confidence and source sections
 
