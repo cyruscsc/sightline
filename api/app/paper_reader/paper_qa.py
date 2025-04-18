@@ -54,6 +54,42 @@ class PaperQA:
         unique_docs = list(set(flattened_docs))
         return [loads(doc) for doc in unique_docs]
 
+    def _reciprocal_rank_fusion(
+        results: list[list[Document]], k: int = 60
+    ) -> list[tuple[Document, float]]:
+        """
+        Perform Reciprocal Rank Fusion on the results.
+
+        Args:
+            results (list[list[Document]]): List of lists of documents
+        Returns:
+            list[tuple[Document, float]]: List of tuples containing documents and their scores
+        """
+        # Initialize a dictionary to store the fused scores
+        fused_scores = {}
+
+        # Iterate through each list of documents
+        for docs in results:
+            # Iterate through each document in the list
+            for rank, doc in enumerate(docs):
+                doc_str = dumps(doc)
+
+                # If the document is not already in the fused scores, add it
+                # Otherwise, update the score using the RRF formula: 1 / (rank + k)
+                fused_scores[doc_str] = fused_scores.get(doc_str, 0) + 1 / (rank + k)
+
+        # Sort the fused scores in descending order
+        reranked_results = [
+            (loads(doc_str), score)
+            for doc_str, score in sorted(
+                fused_scores.items(),
+                key=lambda x: x[1],
+                reverse=True,
+            )
+        ]
+
+        return reranked_results
+
     def _create_simple_retrieval_chain(
         self, retriever: VectorStoreRetriever
     ) -> RunnableSerializable:
@@ -73,20 +109,18 @@ class PaperQA:
 
         return retrieval_chain
 
-    def _create_multi_query_retrieval_chain(
-        self, retriever: VectorStoreRetriever
-    ) -> RunnableSerializable:
+    def _create_multi_query_chain(self) -> RunnableSerializable:
         """
-        Create a RAG retrieval chain with multi-query.
+        Create a multi-query chain for generating multiple perspectives on the user question.
 
-        Args:
-            retriever (VectorStoreRetriever): The vector store retriever
         Returns:
-            RunnableSerializable: The configured multi-query retrieval chain
+            RunnableSerializable: The configured multi-query chain
         """
         prompt_template = dedent(
             """\
-            You are an AI language model assistant. Your task is to generate five different versions of the given user question to retrieve relevant documents from a vector database. By generating multiple perspectives on the user question, your goal is to help the user overcome some of the limitations of the distance-based similarity search.
+            You are an AI language model assistant.
+            Your task is to generate five different versions of the given user question to retrieve relevant documents from a vector database.
+            By generating multiple perspectives on the user question, your goal is to help the user overcome some of the limitations of the distance-based similarity search.
             Provide these alternative questions separated by newlines.
             Original question: {question}"""
         )
@@ -99,10 +133,47 @@ class PaperQA:
             | RunnableLambda(lambda x: x.split("\n"))
         )
 
+        return query_chain
+
+    def _create_multi_query_retrieval_chain(
+        self, retriever: VectorStoreRetriever
+    ) -> RunnableSerializable:
+        """
+        Create a RAG retrieval chain with multi-query.
+
+        Args:
+            retriever (VectorStoreRetriever): The vector store retriever
+        Returns:
+            RunnableSerializable: The configured multi-query retrieval chain
+        """
+        query_chain = self._create_multi_query_chain()
+
         retrieval_chain = (
             query_chain
             | retriever.map()
             | RunnableLambda(self._get_unique_union)
+            | RunnableLambda(lambda x: "\n".join([doc.page_content for doc in x]))
+        )
+
+        return retrieval_chain
+
+    def _create_rag_fusion_retrieval_chain(
+        self, retriever: VectorStoreRetriever
+    ) -> RunnableSerializable:
+        """
+        Create a RAG retrieval chain with RAG-Fusion.
+
+        Args:
+            retriever (VectorStoreRetriever): The vector store retriever
+        Returns:
+            RunnableSerializable: The configured RAG-Fusion retrieval chain
+        """
+        query_chain = self._create_multi_query_chain()
+
+        retrieval_chain = (
+            query_chain
+            | retriever.map()
+            | RunnableLambda(self._reciprocal_rank_fusion)
             | RunnableLambda(lambda x: "\n".join([doc.page_content for doc in x]))
         )
 
@@ -176,6 +247,8 @@ class PaperQA:
                     retrieval_chain = self._create_multi_query_retrieval_chain(
                         retriever
                     )
+                case "rag_fusion":
+                    retrieval_chain = self._create_rag_fusion_retrieval_chain(retriever)
                 case _:
                     retrieval_chain = self._create_simple_retrieval_chain(retriever)
 
