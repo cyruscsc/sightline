@@ -179,6 +179,35 @@ class PaperQA:
 
         return retrieval_chain
 
+    def _create_hyde_retrieval_chain(
+        self, retriever: VectorStoreRetriever
+    ) -> RunnableSerializable:
+        """
+        Create a RAG retrieval chain with HyDE.
+
+        Args:
+            retriever (VectorStoreRetriever): The vector store retriever
+        Returns:
+            RunnableSerializable: The configured HyDE retrieval chain
+        """
+        prompt_template = dedent(
+            """\
+            You are an AI academic research assistant.
+            Please write an academic passage to answer the following question.
+            Question: {question}"""
+        )
+        prompt_hyde = ChatPromptTemplate.from_template(prompt_template)
+
+        query_chain = prompt_hyde | self._llm | StrOutputParser()
+
+        retrieval_chain = (
+            query_chain
+            | retriever
+            | RunnableLambda(lambda x: "\n".join([doc.page_content for doc in x]))
+        )
+
+        return retrieval_chain
+
     def _create_rag_chain(
         self, retrieval_chain: RunnableSerializable
     ) -> RunnableSerializable:
@@ -249,6 +278,8 @@ class PaperQA:
                     )
                 case "rag_fusion":
                     retrieval_chain = self._create_rag_fusion_retrieval_chain(retriever)
+                case "hyde":
+                    retrieval_chain = self._create_hyde_retrieval_chain(retriever)
                 case _:
                     retrieval_chain = self._create_simple_retrieval_chain(retriever)
 

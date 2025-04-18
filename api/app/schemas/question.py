@@ -6,6 +6,7 @@ class StrategyEnum(str, Enum):
     simple = "simple"
     multi_query = "multi-query"
     rag_fusion = "rag-fusion"
+    hyde = "hyde"
 
 
 class QuestionRequest(BaseModel):
