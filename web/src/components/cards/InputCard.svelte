@@ -2,13 +2,17 @@
 	import { sightline } from '$lib/state.svelte';
 	import URLField from '$components/fields/URLField.svelte';
 	import QuestionField from '$components/fields/QuestionField.svelte';
+	import StrategyField from '$components/fields/StrategyField.svelte';
 	import SummarizeButton from '$components/buttons/SummarizeButton.svelte';
 	import AskButton from '$components/buttons/AskButton.svelte';
 </script>
 
 <div class="input-container">
 	<URLField />
-	<QuestionField />
+	<div class="question-group">
+		<QuestionField />
+		<StrategyField />
+	</div>
 
 	<div class="button-group">
 		<SummarizeButton />
@@ -28,6 +32,11 @@
 		box-shadow: var(--shadow);
 		display: flex;
 		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.question-group {
+		display: flex;
 		gap: 1rem;
 	}
 
