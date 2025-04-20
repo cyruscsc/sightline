@@ -15,14 +15,14 @@ class MultiQuery(BaseRAG):
     MultiQuery RAG system.
     """
 
-    def __init__(self, retriver: VectorStoreRetriever, llm: ChatOpenAI):
+    def __init__(self, retriever: VectorStoreRetriever, llm: ChatOpenAI):
         """
         Initialize the MultiQuery RAG system.
 
         Args:
             retriever (VectorStoreRetriever): The vector store retriever.
         """
-        self._retriever = retriver
+        self._retriever = retriever
         self._llm = llm
         self._query_prompt_template = dedent(
             """\
@@ -47,16 +47,16 @@ class MultiQuery(BaseRAG):
             Answer:"""
         )
 
-    def _get_unique_union(self, doccuments: list[list[Document]]) -> list[Document]:
+    def _get_unique_union(self, documents: list[list[Document]]) -> list[Document]:
         """
         Get unique documents from a list of lists of documents.
 
         Args:
-            doccuments (list[list[Document]]): List of lists of documents
+            documents (list[list[Document]]): List of lists of documents
         Returns:
             list[Document]: List of unique documents
         """
-        flattened_docs = [dumps(doc) for sublist in doccuments for doc in sublist]
+        flattened_docs = [dumps(doc) for sublist in documents for doc in sublist]
         unique_docs = list(set(flattened_docs))
         return [loads(doc) for doc in unique_docs]
 
