@@ -44,7 +44,7 @@ async def ask(question_request: QuestionRequest) -> dict:
         paper_data = paper.get_paper_data()
 
         # Initialize QA system and get answer
-        qa_system = PaperQA(paper_data)
+        qa_system = PaperQA(paper_data, question_request.strategy)
         answer = await qa_system.ask_question(question_request.question)
 
         return answer

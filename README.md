@@ -6,7 +6,7 @@
 
 ## Intro
 
-Sightline is an LLM-powered research assistant designed to help you quickly extract insights from research papers on [arXiv](https://arxiv.org/). 
+Sightline is an LLM-powered research assistant designed to help you quickly extract insights from research papers on [arXiv](https://arxiv.org/).
 
 It provides a structured summary of the paper, with more detail than just the abstract. It also answers questions based on the content of the paper, without making overconfident claims.
 
@@ -18,6 +18,7 @@ By simply pasting the link, you can save hours of sifting through multiple paper
 ├── api                   # FastAPI app
 │   └── app
 │       ├── paper_reader  # Where the magic happens
+│       ├── qa_rag        # Where the runes are crafted
 │       ├── schemas       # Where the rules are imposed
 │       └── tests         # Where the experiments take place
 └── web                   # Svelte app

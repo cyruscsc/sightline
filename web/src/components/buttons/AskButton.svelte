@@ -13,12 +13,21 @@
 			return;
 		}
 
+		if (!sightline.strategy) {
+			sightline.errorMessage = 'Please select a strategy';
+			return;
+		}
+
 		sightline.errorMessage = '';
 		sightline.isLoading = true;
 		sightline.result = '';
 
 		try {
-			sightline.result = await askQuestion(sightline.arxivUrl, sightline.question);
+			sightline.result = await askQuestion(
+				sightline.arxivUrl,
+				sightline.question,
+				sightline.strategy
+			);
 		} catch (error: any) {
 			sightline.errorMessage = `Failed to get answer: ${error.message || 'Unknown error'}`;
 		} finally {

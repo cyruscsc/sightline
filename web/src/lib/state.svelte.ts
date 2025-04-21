@@ -1,6 +1,7 @@
 // Create state using runes
 let arxivUrl = $state('');
 let question = $state('');
+let strategy = $state('simple');
 let result = $state('');
 let isLoading = $state(false);
 let errorMessage = $state('');
@@ -13,6 +14,9 @@ export const sightline = {
 	},
 	get question() {
 		return question;
+	},
+	get strategy() {
+		return strategy;
 	},
 	get result() {
 		return result;
@@ -30,6 +34,9 @@ export const sightline = {
 	},
 	set question(value) {
 		question = value;
+	},
+	set strategy(value) {
+		strategy = value;
 	},
 	set result(value) {
 		result = value;
