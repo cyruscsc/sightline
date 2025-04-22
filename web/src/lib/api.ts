@@ -63,7 +63,11 @@ export const summarizePaper = async (arxivUrl: string): Promise<string> => {
 /**
  * Ask a question about the paper
  */
-export const askQuestion = async (arxivUrl: string, question: string): Promise<string> => {
+export const askQuestion = async (
+	arxivUrl: string,
+	question: string,
+	strategy: string
+): Promise<string> => {
 	const response = await fetch(`${API_URL}/ask`, {
 		method: 'POST',
 		headers: {
@@ -71,7 +75,8 @@ export const askQuestion = async (arxivUrl: string, question: string): Promise<s
 		},
 		body: JSON.stringify({
 			paper_url: arxivUrl,
-			question: question
+			question: question,
+			strategy: strategy
 		})
 	});
 

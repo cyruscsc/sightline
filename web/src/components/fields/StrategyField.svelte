@@ -1,27 +1,31 @@
 <script lang="ts">
 	import { sightline } from '$lib/state.svelte';
+
+	let strategies = $state([
+		{ name: 'Simple', value: 'simple' },
+		{ name: 'Multi-Query', value: 'multi-query' },
+		{ name: 'RAG-Fusion', value: 'rag-fusion' },
+		{ name: 'HyDE', value: 'hyde' }
+	]);
 </script>
 
 <div class="form-group">
-	<label for="question">Optional Question</label>
-	<input
-		type="text"
-		id="question"
-		class="input"
-		bind:value={sightline.question}
-		placeholder="Ask a question about the paper..."
-	/>
+	<label for="arxiv-url">Strategy</label>
+	<select bind:value={sightline.strategy} class="select">
+		{#each strategies as strategy}
+			<option value={strategy.value}>{strategy.name}</option>
+		{/each}
+	</select>
 </div>
 
 <style>
 	.form-group {
 		display: flex;
 		flex-direction: column;
-		flex: 1;
 		gap: 0.5rem;
 	}
 
-	.input {
+	.select {
 		padding: 0.5rem;
 		border: 1px solid var(--border);
 		border-radius: 8px;
@@ -32,7 +36,7 @@
 		transition: border-color 0.2s;
 	}
 
-	.input:focus {
+	.select:focus {
 		border-color: var(--border-focus);
 	}
 </style>

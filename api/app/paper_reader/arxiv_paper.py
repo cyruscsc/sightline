@@ -7,7 +7,7 @@ import os
 
 
 class ArXivPaper:
-    def __init__(self, url: str):
+    def __init__(self, url: str, chunk_size: int = 1000, chunk_overlap: int = 100):
         """
         Initialize an ArXivPaper instance with a given arXiv URL.
 
@@ -19,8 +19,8 @@ class ArXivPaper:
         """
         self._client = arxiv.Client()
         self._text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
         )
 
         # Initialize attributes

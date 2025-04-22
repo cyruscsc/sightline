@@ -1,9 +1,18 @@
+from enum import Enum
 from pydantic import BaseModel, Field
+
+
+class StrategyEnum(str, Enum):
+    simple = "simple"
+    multi_query = "multi-query"
+    rag_fusion = "rag-fusion"
+    hyde = "hyde"
 
 
 class QuestionRequest(BaseModel):
     paper_url: str
     question: str
+    strategy: StrategyEnum = StrategyEnum.simple
 
     model_config = {
         "json_schema_extra": {
@@ -11,6 +20,7 @@ class QuestionRequest(BaseModel):
                 {
                     "paper_url": "https://arxiv.org/abs/1706.03762",
                     "question": "What is the proposed network architecture?",
+                    "strategy": "simple",
                 }
             ]
         }

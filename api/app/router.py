@@ -26,7 +26,7 @@ async def summarize(summary_request: SummaryRequest) -> dict:
 
         # Generate summary
         summarizer = PaperSummarizer()
-        summary = summarizer.generate_summary(paper_data)
+        summary = await summarizer.generate_summary(paper_data)
 
         return summary
 
@@ -44,8 +44,8 @@ async def ask(question_request: QuestionRequest) -> dict:
         paper_data = paper.get_paper_data()
 
         # Initialize QA system and get answer
-        qa_system = PaperQA(paper_data)
-        answer = qa_system.ask_question(question_request.question)
+        qa_system = PaperQA(paper_data, question_request.strategy)
+        answer = await qa_system.ask_question(question_request.question)
 
         return answer
 
